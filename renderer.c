@@ -19,8 +19,7 @@ GLuint
   FragmentShaderId,
   ProgramId,
   VaoId,
-  VboId,
-  ColorBufferId;
+  VboId;
     
 // GLSL vertex shader -- where GLSL = "OpenGL Shading Language"
 const GLchar* VertexShader =
@@ -117,7 +116,7 @@ void RenderFunction(void) {
   // clear buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -149,18 +148,23 @@ void Cleanup(void) {
 // create buffer objects and define buffer contents
 void CreateVBO(void) {
   // triangle vertices
-  GLfloat Vertices[] = {
-     -0.8f, -0.8f, 0.0f, 1.0f,
-     0.0f,  0.8f, 0.0f, 1.0f,
-     0.8f, -0.8f, 0.0f, 1.0f
-  };
-  GLfloat Colors[] = {
-    1.0f, 0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f, 1.0f
+  Vertex Vertices[] = {
+    { { -0.8f, -0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { -0.2f, -0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { -0.8f, -0.2f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { -0.2f, -0.2f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.8f, -0.2f, 0.0f, 1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f } },
+    { { 0.2f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f } },
+    { { 0.8f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f } },
+    { { -0.2f, -0.2f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.4f, -0.2f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.2f, 0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
   };
 
   GLenum ErrorCheckValue = glGetError();
+  const size_t BufferSize = sizeof(Vertices);
+  const size_t VertexSize = sizeof(Vertices[0]);
+  const size_t RGBAOffset = sizeof(Vertices[0].pos);
 
   // generates vertex array objects in GPU's memory and stores
   // their identifiers in VaoId (only 1 identifier in this case)
@@ -174,20 +178,16 @@ void CreateVBO(void) {
   glBindBuffer(GL_ARRAY_BUFFER, VboId);
   // copy vertex data over to buffer (GL_ARRAY_BUFFER refers to target)
   // static indicates that "Vertices" will not be modified after upload
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, BufferSize, Vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+  // define data type for vertex positions and colors
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)RGBAOffset);
   glEnableVertexAttribArray(0);
-
-  glGenBuffers(1, &ColorBufferId);
-  glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(1);
 
   ErrorCheckValue = glGetError();
-  if (ErrorCheckValue != GL_NO_ERROR)
-  {
+  if (ErrorCheckValue != GL_NO_ERROR) {
     fprintf(
       stderr,
       "ERROR: Could not create a VBO: %s \n",
@@ -206,7 +206,6 @@ void DestroyVBO(void) {
   glDisableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDeleteBuffers(1, &ColorBufferId);
   glDeleteBuffers(1, &VboId);
 
   glBindVertexArray(0);
@@ -225,19 +224,24 @@ void DestroyVBO(void) {
   }
 }
 
-// another function from openglbook i dont fully understand yet
+// compiles and links shader programs
 void CreateShaders(void)
 {
   GLenum ErrorCheckValue = glGetError();
 
+  // create shader object of type GL_VERTEX_SHADER and get its id
   VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+  // load shader source code and associate with id from above
   glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
+  // compile shader to shader with id from above
   glCompileShader(VertexShaderId);
 
+  // repeat process for fragment shader
   FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
   glCompileShader(FragmentShaderId);
 
+  // create opengl program and link compiled shaders
   ProgramId = glCreateProgram();
   glAttachShader(ProgramId, VertexShaderId);
   glAttachShader(ProgramId, FragmentShaderId);
