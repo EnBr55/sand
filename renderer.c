@@ -6,10 +6,16 @@
 #include "glew.c"
 #include "renderer.h"
 
+#define WIDTH 10
+#define NUM_CELLS (WIDTH * WIDTH)
+
 int
   CurrentWidth = 800,
   CurrentHeight = 600,
   WindowHandle = 0;
+
+float cellColors[NUM_CELLS][4];
+float cellTranslations[NUM_CELLS][2];
 
 unsigned FrameCount = 0;
 
@@ -20,20 +26,22 @@ GLuint
   ProgramId,
   VaoId,
   VboId,
-  IndexBufferId;
+  IndexBufferId,
+  instanceVBO;
     
 // GLSL vertex shader -- where GLSL = "OpenGL Shading Language"
 const GLchar* VertexShader =
 {
   "#version 400\n"\
 
-  "layout(location=0) in vec4 in_Position;\n"\
+  "layout(location=0) in vec2 in_Position;\n"\
   "layout(location=1) in vec4 in_Color;\n"\
+  "layout(location=2) in vec2 in_Offset;\n"\
   "out vec4 ex_Color;\n"\
 
   "void main(void)\n"\
   "{\n"\
-  "  gl_Position = in_Position;\n"\
+  "  gl_Position = vec4(in_Position + in_Offset, 0.0, 1.0);\n"\
   "  ex_Color = in_Color;\n"\
   "}\n"
 };
@@ -52,6 +60,18 @@ const GLchar* FragmentShader =
   "}\n"
 };
 
+int idxFromCoord(int x, int y, int width) {
+  return x + width*y;
+}
+
+int xFromIdx(int i, int width) {
+  return i % width;
+}
+
+int yFromIdx(int i, int width) {
+  return i / width;
+}
+
 void Initialize(int argc, char* argv[]) {
   GLenum GlewInitResult;
 
@@ -68,6 +88,23 @@ void Initialize(int argc, char* argv[]) {
     "INFO: OpenGL Version: %s\n",
     glGetString(GL_VERSION)
   );
+
+  // initialize translations
+  // NOTE TO FUTURE BEN:
+    // normalised coords for shaders operate in [-1, 1] ...
+    // but we're indexing with only positive (x, y)
+  int i = 0;
+  for (int x = -WIDTH; x < WIDTH; x+=2) {
+    for (int y = -WIDTH; y < WIDTH; y+=2) {
+      cellTranslations[i][0] = (float)x / WIDTH + +0.10f;
+      cellTranslations[i][1] = (float)y / WIDTH + 0.10f;
+
+      cellColors[i][0] = (float)i / NUM_CELLS;
+      cellColors[i][1] = 1;
+      cellColors[i][2] = 1;
+      cellColors[i++][3] = 1;
+    }
+  }
 
   CreateShaders();
   CreateVBO();
@@ -117,7 +154,10 @@ void RenderFunction(void) {
   // clear buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glDrawElements(GL_TRIANGLES, 48, GL_UNSIGNED_BYTE, (GLvoid*)0);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+  //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid*)0);
+  glDrawArraysInstanced(GL_TRIANGLES, 0, 6, NUM_CELLS);
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -142,57 +182,31 @@ void TimerFunction(int Value) {
 
 // cleanup function to be passed to glut
 void Cleanup(void) {
+    printf("Cleaning up\n");
   DestroyShaders();
   DestroyVBO();
 }
 
 // create buffer objects and define buffer contents
 void CreateVBO(void) {
-  // triangle vertices
+  // Square vertices
   Vertex Vertices[] = {
-    { { 0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } },
-    // Top
-    { { -0.2f, 0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-    { { 0.2f, 0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-    { { 0.0f, 0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, 1.0f } },
-    { { 0.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-    // Bottom
-    { { -0.2f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-    { { 0.2f, -0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-    { { 0.0f, -0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, 1.0f } },
-    { { 0.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-    // Left
-    { { -0.8f, -0.2f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-    { { -0.8f, 0.2f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-    { { -0.8f, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, 1.0f } },
-    { { -1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-    // Right
-    { { 0.8f, -0.2f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-    { { 0.8f, 0.2f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-    { { 0.8f, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, 1.0f } },
-    { { 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }
+    // Top left { {pos}, {color} }
+    { { -0.1f, 0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    // Bottom left
+    { { -0.1f, -0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    // Top right
+    { { 0.1f, 0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    // Top right
+    { { 0.1f, 0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    // Bottom right
+    { { 0.1f, -0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    // Bottom left
+    { { -0.1f, -0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
   };
   GLubyte Indices[] = {
-	// Top
-	0, 1, 3,
-	0, 3, 2,
-	3, 1, 4,
-	3, 4, 2,
-	// Bottom
-	0, 5, 7,
-	0, 7, 6,
-	7, 5, 8,
-	7, 8, 6,
-	// Left
-	0, 9, 11,
-	0, 11, 10,
-	11, 9, 12,
-	11, 12, 10,
-	// Right
-	0, 13, 15,
-	0, 15, 14,
-	15, 13, 16,
-	15, 16, 14
+    0, 1, 2,
+    3, 2, 1
 };
 
   GLenum ErrorCheckValue = glGetError();
@@ -220,8 +234,20 @@ void CreateVBO(void) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glGenBuffers(1, &IndexBufferId);
-glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferId);
-glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferId);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+  // buffer object for translation data
+  glGenBuffers(1, &instanceVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float[2]) * NUM_CELLS, &cellTranslations[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // set attribute pointer for translations
+  glEnableVertexAttribArray(2);
+  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // update content of vertex attribute 2 when we render new instance
+  glVertexAttribDivisor(2, 1);
 
   ErrorCheckValue = glGetError();
   if (ErrorCheckValue != GL_NO_ERROR) {

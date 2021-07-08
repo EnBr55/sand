@@ -4,9 +4,15 @@
 #define WINDOW_TITLE_PREFIX "Ben Game"
 
 typedef struct {
-  float pos[4];
+  float pos[2];
   float rgba[4];
 } Vertex;
+
+
+
+int idxFromCoord(int x, int y, int width);
+int xFromIdx(int i, int width);
+int yFromIdx(int i, int width);
 
 void Initialize(int, char*[]);
 void InitWindow(int, char*[]);
