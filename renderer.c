@@ -8,7 +8,7 @@
 
 int
   CurrentWidth = 800,
-  CurrentHeight = 600,
+  CurrentHeight = 800,
   WindowHandle = 0;
 
 float cellTranslations[NUM_CELLS][2];
@@ -84,11 +84,7 @@ void Initialize(int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
   
-  fprintf(
-    stdout,
-    "INFO: OpenGL Version: %s\n",
-    glGetString(GL_VERSION)
-  );
+  fprintf(stdout, "OpenGL Version: %s\n", glGetString(GL_VERSION));
 
   cellColors = Init();
 

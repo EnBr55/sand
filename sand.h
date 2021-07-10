@@ -23,7 +23,6 @@ typedef struct {
 typedef struct {
   int type;
   Position pos;
-  Color color;
 } Cell;
 
 typedef struct {
@@ -31,9 +30,10 @@ typedef struct {
   Cell * cells;
 } SimData;
 
-Cell * getCell(int x, int y);
 
+Cell * getCell(SimData * sim, int x, int y);
 void setCell(SimData * sim, int x, int y, int type);
+void updateCell(SimData * sim, int x, int y);
 void setColor(float * colors, int idx, float r, float g, float b, float a);
 
 #endif

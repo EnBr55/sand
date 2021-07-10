@@ -7,8 +7,6 @@
 SimData sim;
 
 float * Init() {
-  printf("Sim initializing...\n");
-
   sim.cells = malloc(sizeof(Cell) * NUM_CELLS);
   // floats for RGBA vals of each cell
   sim.cellColors = malloc(sizeof(float[4]) * NUM_CELLS);
@@ -21,11 +19,19 @@ float * Init() {
       setCell(&sim, xFromIdx(i), yFromIdx(i), AIR);
     }
   }
+  for (int i = 400; i < 590; i += 3) {
+    setCell(&sim, 500, i, DIRT);
+  } 
   return cellColors;
 }
 
 float * Render(long tick) {
   float * cellColors = sim.cellColors;
+  for (int i = 0; i < NUM_CELLS; i++) {
+    if (tick % 1 == 0) {
+      updateCell(&sim, xFromIdx(i), yFromIdx(i));
+    }
+  }
   return cellColors;
 }
 
