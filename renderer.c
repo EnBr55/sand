@@ -6,7 +6,7 @@
 #include "glew.c"
 #include "renderer.h"
 
-#define WIDTH 10
+#define WIDTH 2
 #define NUM_CELLS (WIDTH * WIDTH)
 
 int
@@ -27,6 +27,7 @@ GLuint
   VaoId,
   VboId,
   IndexBufferId,
+  colorVBO,
   instanceVBO;
     
 // GLSL vertex shader -- where GLSL = "OpenGL Shading Language"
@@ -156,6 +157,18 @@ void RenderFunction(void) {
 
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
+  if (FrameCount % 1000 == 0) {
+    printf("Framecount: %d\n", FrameCount);
+    printf("THING\n");
+    cellColors[0][1] += 0.1f;
+    cellColors[1][1] += 0.1f;
+    cellColors[2][1] += 0.1f;
+    cellColors[3][1] += 0.1f;
+    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float[4]) * NUM_CELLS, &cellColors[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
   //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid*)0);
   glDrawArraysInstanced(GL_TRIANGLES, 0, 6, NUM_CELLS);
 
@@ -192,27 +205,22 @@ void CreateVBO(void) {
   // Square vertices
   Vertex Vertices[] = {
     // Top left { {pos}, {color} }
-    { { -0.1f, 0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { -0.1f, 0.1f } },
     // Bottom left
-    { { -0.1f, -0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { -0.1f, -0.1f }  },
     // Top right
-    { { 0.1f, 0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.1f, 0.1f } },
     // Top right
-    { { 0.1f, 0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.1f, 0.1f } },
     // Bottom right
-    { { 0.1f, -0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { 0.1f, -0.1f } },
     // Bottom left
-    { { -0.1f, -0.1f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    { { -0.1f, -0.1f } },
   };
-  GLubyte Indices[] = {
-    0, 1, 2,
-    3, 2, 1
-};
 
   GLenum ErrorCheckValue = glGetError();
   const size_t BufferSize = sizeof(Vertices);
   const size_t VertexSize = sizeof(Vertices[0]);
-  const size_t RGBAOffset = sizeof(Vertices[0].pos);
 
   // generates vertex array objects in GPU's memory and stores
   // their identifiers in VaoId (only 1 identifier in this case)
@@ -230,12 +238,22 @@ void CreateVBO(void) {
 
   // define data type for vertex positions and colors
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)RGBAOffset);
   glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
   glGenBuffers(1, &IndexBufferId);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferId);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+
+  // buffer object for color data
+  glGenBuffers(1, &colorVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float[4]) * NUM_CELLS, &cellColors[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // set attribute pointer for translations
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // update content of vertex attribute 1 when we render new instance
+  glVertexAttribDivisor(1, 1);
+
   // buffer object for translation data
   glGenBuffers(1, &instanceVBO);
   glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
