@@ -6,18 +6,17 @@
 #include "glew.c"
 #include "renderer.h"
 
-#define WIDTH 2
-#define NUM_CELLS (WIDTH * WIDTH)
-
 int
   CurrentWidth = 800,
   CurrentHeight = 600,
   WindowHandle = 0;
 
-float cellColors[NUM_CELLS][4];
 float cellTranslations[NUM_CELLS][2];
+float * cellColors;
+
 
 unsigned FrameCount = 0;
+long tick = 0;
 
 // declare global GLEW ids
 GLuint
@@ -30,7 +29,8 @@ GLuint
   colorVBO,
   instanceVBO;
     
-// GLSL vertex shader -- where GLSL = "OpenGL Shading Language"
+// basic GLSL vertex shader that takes in (x, y) coordinates
+// and a color, and outputs instanced array of squares to a fragment shader
 const GLchar* VertexShader =
 {
   "#version 400\n"\
@@ -47,7 +47,7 @@ const GLchar* VertexShader =
   "}\n"
 };
 
-// GLSL fragment shader
+// Fragment shader that just takes in color and outputs
 const GLchar* FragmentShader =
 {
   "#version 400\n"\
@@ -61,16 +61,16 @@ const GLchar* FragmentShader =
   "}\n"
 };
 
-int idxFromCoord(int x, int y, int width) {
-  return x + width*y;
+int idxFromCoord(int x, int y) {
+  return x*RGBA_OFFSET + WIDTH*y*RGBA_OFFSET;
 }
 
-int xFromIdx(int i, int width) {
-  return i % width;
+int xFromIdx(int i) {
+  return (i % WIDTH)*RGBA_OFFSET;
 }
 
-int yFromIdx(int i, int width) {
-  return i / width;
+int yFromIdx(int i) {
+  return (i / WIDTH)*RGBA_OFFSET;
 }
 
 void Initialize(int argc, char* argv[]) {
@@ -90,20 +90,13 @@ void Initialize(int argc, char* argv[]) {
     glGetString(GL_VERSION)
   );
 
-  // initialize translations
-  // NOTE TO FUTURE BEN:
-    // normalised coords for shaders operate in [-1, 1] ...
-    // but we're indexing with only positive (x, y)
+  cellColors = Init();
+
   int i = 0;
   for (int x = -WIDTH; x < WIDTH; x+=2) {
     for (int y = -WIDTH; y < WIDTH; y+=2) {
-      cellTranslations[i][0] = (float)x / WIDTH + +0.10f;
-      cellTranslations[i][1] = (float)y / WIDTH + 0.10f;
-
-      cellColors[i][0] = (float)i / NUM_CELLS;
-      cellColors[i][1] = 1;
-      cellColors[i][2] = 1;
-      cellColors[i++][3] = 1;
+      cellTranslations[i][0] = (float)x / WIDTH + CELL_WIDTH;
+      cellTranslations[i++][1] = (float)y / WIDTH + CELL_WIDTH;
     }
   }
 
@@ -151,25 +144,22 @@ void ResizeFunction(int Width, int Height) {
 }
 
 void RenderFunction(void) {
+  ++tick;
   ++FrameCount;
   // clear buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-  if (FrameCount % 1000 == 0) {
-    printf("Framecount: %d\n", FrameCount);
-    printf("THING\n");
-    cellColors[0][1] += 0.1f;
-    cellColors[1][1] += 0.1f;
-    cellColors[2][1] += 0.1f;
-    cellColors[3][1] += 0.1f;
+  if (tick % 1 == 0) {
+    cellColors = Render();
     glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float[4]) * NUM_CELLS, &cellColors[0], GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float[4]) * NUM_CELLS, (void *)cellColors);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
   //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid*)0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDrawArraysInstanced(GL_TRIANGLES, 0, 6, NUM_CELLS);
 
   glutSwapBuffers();
@@ -198,6 +188,7 @@ void Cleanup(void) {
     printf("Cleaning up\n");
   DestroyShaders();
   DestroyVBO();
+  CleanupSim();
 }
 
 // create buffer objects and define buffer contents
@@ -205,17 +196,17 @@ void CreateVBO(void) {
   // Square vertices
   Vertex Vertices[] = {
     // Top left { {pos}, {color} }
-    { { -0.1f, 0.1f } },
+    { { -CELL_WIDTH, CELL_WIDTH } },
     // Bottom left
-    { { -0.1f, -0.1f }  },
+    { { -CELL_WIDTH, -CELL_WIDTH }  },
     // Top right
-    { { 0.1f, 0.1f } },
+    { { CELL_WIDTH, CELL_WIDTH } },
     // Top right
-    { { 0.1f, 0.1f } },
+    { { CELL_WIDTH, CELL_WIDTH } },
     // Bottom right
-    { { 0.1f, -0.1f } },
+    { { CELL_WIDTH, -CELL_WIDTH } },
     // Bottom left
-    { { -0.1f, -0.1f } },
+    { { -CELL_WIDTH, -CELL_WIDTH } },
   };
 
   GLenum ErrorCheckValue = glGetError();
@@ -244,7 +235,7 @@ void CreateVBO(void) {
   // buffer object for color data
   glGenBuffers(1, &colorVBO);
   glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float[4]) * NUM_CELLS, &cellColors[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float[4]) * NUM_CELLS, cellColors, GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   // set attribute pointer for translations
   glEnableVertexAttribArray(1);
