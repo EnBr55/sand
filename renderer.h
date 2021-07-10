@@ -6,13 +6,9 @@
 
 // SIM CONSTANTS
 
-#define WIDTH 30
+#define WIDTH 10
 #define NUM_CELLS (WIDTH * WIDTH)
 #define CELL_WIDTH (1.0f * WIDTH / NUM_CELLS)
-
-typedef struct {
-  float * cellColors;
-} SimData;
 
 typedef struct {
   float pos[2];
@@ -20,9 +16,9 @@ typedef struct {
 } Vertex;
 
 
-int idxFromCoord(int x, int y);
-int xFromIdx(int i);
-int yFromIdx(int i);
+int ColorIdxFromCoord(int x, int y);
+int ColorXFromIdx(int i);
+int ColorYFromIdx(int i);
 
 // Implemented by renderer
 void Initialize(int, char*[]);
@@ -43,7 +39,7 @@ void DestroyShaders(void);
 // Called once by renderer after GLEW initialization
 float * Init(void);
 // Called every frame
-float * Render(void);
+float * Render(long tick);
 void CleanupSim(void);
 
 #endif

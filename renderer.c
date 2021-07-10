@@ -61,15 +61,15 @@ const GLchar* FragmentShader =
   "}\n"
 };
 
-int idxFromCoord(int x, int y) {
+int ColorIdxFromCoord(int x, int y) {
   return x*RGBA_OFFSET + WIDTH*y*RGBA_OFFSET;
 }
 
-int xFromIdx(int i) {
+int ColorXFromIdx(int i) {
   return (i % WIDTH)*RGBA_OFFSET;
 }
 
-int yFromIdx(int i) {
+int ColorYFromIdx(int i) {
   return (i / WIDTH)*RGBA_OFFSET;
 }
 
@@ -95,8 +95,8 @@ void Initialize(int argc, char* argv[]) {
   int i = 0;
   for (int x = -WIDTH; x < WIDTH; x+=2) {
     for (int y = -WIDTH; y < WIDTH; y+=2) {
-      cellTranslations[i][0] = (float)x / WIDTH + CELL_WIDTH;
-      cellTranslations[i++][1] = (float)y / WIDTH + CELL_WIDTH;
+      cellTranslations[i][0] = (float)y / WIDTH + CELL_WIDTH;
+      cellTranslations[i++][1] = (float)x / WIDTH + CELL_WIDTH;
     }
   }
 
@@ -148,18 +148,13 @@ void RenderFunction(void) {
   ++FrameCount;
   // clear buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearColor(0.2f, 0.2f, 0.4f, 1.0f);
 
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
-  if (tick % 1 == 0) {
-    cellColors = Render();
-    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float[4]) * NUM_CELLS, (void *)cellColors);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-  }
-
-  //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid*)0);
+  cellColors = Render(tick);
+  glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float[4]) * NUM_CELLS, (void *)cellColors);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   glDrawArraysInstanced(GL_TRIANGLES, 0, 6, NUM_CELLS);
 
   glutSwapBuffers();

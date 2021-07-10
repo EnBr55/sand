@@ -2,24 +2,29 @@
 #include <stdio.h>
 #include <GL/freeglut.h>
 #include "renderer.h"
+#include "sand.h"
 
 SimData sim;
 
 float * Init() {
   printf("Sim initializing...\n");
+
+  sim.cells = malloc(sizeof(Cell) * NUM_CELLS);
   // floats for RGBA vals of each cell
   sim.cellColors = malloc(sizeof(float[4]) * NUM_CELLS);
+
   float * cellColors = sim.cellColors;
   for (int i = 0; i < NUM_CELLS; i++) {
-    cellColors[i*RGBA_OFFSET + 0] = 0.1f;
-    cellColors[i*RGBA_OFFSET + 1] = 0.0f;
-    cellColors[i*RGBA_OFFSET + 2] = 0 *(i * 1.0f) / NUM_CELLS + 0.0f;
-    cellColors[i*RGBA_OFFSET + 3] = 1.0f;
+    if (i < NUM_CELLS / 3) {
+      setCell(&sim, xFromIdx(i), yFromIdx(i), DIRT);
+    } else {
+      setCell(&sim, xFromIdx(i), yFromIdx(i), AIR);
+    }
   }
   return cellColors;
 }
 
-float * Render() {
+float * Render(long tick) {
   float * cellColors = sim.cellColors;
   return cellColors;
 }
