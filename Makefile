@@ -7,4 +7,4 @@ game: src/game.c src/renderer.c src/sand.c src/cells.c
 
 test: src/game.c src/renderer.c src/sand.c src/cells.c
 	$(CC) $(CFLAGS) $^ -o ./build/game
-	./game
+	./build/game

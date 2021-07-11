@@ -1,10 +1,12 @@
 #ifndef SAND_H_INCLUDED
 #define SAND_H_INCLUDED
 
+// Cell ID's
 #define AIR 0
 #define DIRT 1
 #define WATER 2
 
+// helper functions
 int idxFromCoord(int x, int y);
 int xFromIdx(int i);
 int yFromIdx(int i);
@@ -34,6 +36,7 @@ typedef struct {
 } SimData;
 
 
+// simulation functions
 Cell * getCell(SimData * sim, int x, int y);
 void setCell(SimData * sim, long tick, int x, int y, int type, char dir);
 void updateCell(SimData * sim, long tick, int x, int y);
