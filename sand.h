@@ -35,8 +35,10 @@ typedef struct {
 
 
 Cell * getCell(SimData * sim, int x, int y);
-void setCell(SimData * sim, long tick, int x, int y, int type);
+void setCell(SimData * sim, long tick, int x, int y, int type, char dir);
 void updateCell(SimData * sim, long tick, int x, int y);
 void setColor(float * colors, int idx, float r, float g, float b, float a);
+
+void flipDirection(SimData * sim, int x, int y);
 
 #endif

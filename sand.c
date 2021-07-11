@@ -27,14 +27,13 @@ Cell * getCell(SimData * sim, int x, int y) {
   return sim->cells + idx;
 }
 
-void setCell(SimData * sim, long tick, int x, int y, int type) {
+void setCell(SimData * sim, long tick, int x, int y, int type, char dir) {
   int idx = idxFromCoord(x, y);
   sim->cells[idx].type = type;
   sim->cells[idx].pos.x = x;
   sim->cells[idx].pos.y = y;
   sim->cells[idx].lastUpdate = tick;
-  // random direction
-  sim->cells[idx].dir = (rand() % 2) * 2 - 1;
+  sim->cells[idx].dir = dir;
   if (type == DIRT) {
     setColor(sim->cellColors, idx, 0.3f, 0.1f, 0.1f, 1.0f);
   }

@@ -14,9 +14,9 @@ float * Init() {
   float * cellColors = sim.cellColors;
   for (int i = 0; i < NUM_CELLS; i++) {
     if (i < NUM_CELLS / 3) {
-      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), DIRT);
+      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), DIRT, 0);
     } else {
-      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), AIR);
+      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), AIR, 0);
     }
   }
   //for (int i = 400; i < 590; i += 3) {
@@ -41,7 +41,7 @@ void mouseClicked(int button, int state, int x, int y) {
   // normalize y such that (0, 0) is the bottom left of the screen
   int normalizedY = WIDTH - (y / cellPixelWidth) - 1;
   printf("Button: %d, state: %d, x: %d, y: %d\n", button, state, normalizedX, normalizedY);
-  setCell(&sim, 0, normalizedX, normalizedY, WATER);
+  setCell(&sim, 0, normalizedX, normalizedY, WATER, (rand() % 2) * 2 - 1);
 }
 
 void CleanupSim() {
