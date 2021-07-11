@@ -11,9 +11,10 @@ int
   CurrentHeight = WINDOW_WIDTH,
   WindowHandle = 0;
 
+// x and y coordinates for each cell translation
 float cellTranslations[NUM_CELLS][2];
+// pointer to cell colors (which should be received from sim)
 float * cellColors;
-
 
 unsigned FrameCount = 0;
 long tick = 0;
@@ -61,6 +62,7 @@ const GLchar* FragmentShader =
   "}\n"
 };
 
+// Same helper functions as in sand.c but work with colours
 int ColorIdxFromCoord(int x, int y) {
   return x*RGBA_OFFSET + WIDTH*y*RGBA_OFFSET;
 }
@@ -104,9 +106,12 @@ void Initialize(int argc, char* argv[]) {
 void InitWindow(int argc, char* argv[]) {
   glutInit(&argc, argv);
   
+  // glut stuff
   glutInitContextVersion(4, 0);
   glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
   glutInitContextProfile(GLUT_CORE_PROFILE);
+
+  // register callbacks
   glutIdleFunc(IdleFunction);
   glutTimerFunc(0, TimerFunction, 0);
 
@@ -116,7 +121,6 @@ void InitWindow(int argc, char* argv[]) {
   );
   
   glutInitWindowSize(CurrentWidth, CurrentHeight);
-
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 
   WindowHandle = glutCreateWindow(WINDOW_TITLE_PREFIX);
@@ -150,11 +154,16 @@ void RenderFunction(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glClearColor(0.2f, 0.2f, 0.4f, 1.0f);
 
+  // get cell colors from client
   cellColors = Render(tick);
+  // send new cell colors data to GPU
   glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+  // currently just sending entire array  of cell colors each tick - but only 
+  // really need to send subsets of array that have been updated since last render.
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float[4]) * NUM_CELLS, (void *)cellColors);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  // draw cells (6 vertices to make the two triangles in each square)
   glDrawArraysInstanced(GL_TRIANGLES, 0, 6, NUM_CELLS);
 
   glutSwapBuffers();
@@ -266,6 +275,7 @@ void CreateVBO(void) {
 
 }
 
+// cleanup function for VBO
 void DestroyVBO(void) {
   GLenum ErrorCheckValue = glGetError();
 
@@ -274,6 +284,8 @@ void DestroyVBO(void) {
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDeleteBuffers(1, &VboId);
+  glDeleteBuffers(1, &colorVBO);
+  glDeleteBuffers(1, &instanceVBO);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glDeleteBuffers(1, &IndexBufferId);
@@ -286,7 +298,7 @@ void DestroyVBO(void) {
   {
     fprintf(
       stderr,
-      "ERROR: Could not destroy the VBO: %s \n",
+      "ERROR: Could not destroy VBO: %s \n",
       gluErrorString(ErrorCheckValue)
     );
 
@@ -294,7 +306,7 @@ void DestroyVBO(void) {
   }
 }
 
-// compiles and links shader programs
+// compile and link shader programs
 void CreateShaders(void)
 {
   GLenum ErrorCheckValue = glGetError();

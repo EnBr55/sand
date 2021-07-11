@@ -49,7 +49,7 @@ void updateWater(SimData * sim, long tick, int x, int y) {
           dir);
       setCell(sim, tick, x, y, AIR, 0);
     } else {
-      // if everything else fails, try moving sideways in other direction next tick
+      // if everything else fails, flip direction of movement for next tick
       flipDirection(sim, x, y);
     }
 }

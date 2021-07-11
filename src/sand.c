@@ -4,6 +4,7 @@
 #include "sand.h"
 #include "cells.h"
 
+// return pixel array index from x and y coordinates
 int idxFromCoord(int x, int y) {
   if (x < 0 || x >= WIDTH || y < 0 || y >= WIDTH) {
     return -1;
@@ -11,14 +12,17 @@ int idxFromCoord(int x, int y) {
   return x + WIDTH*y;
 }
 
+// return an x-coordinate from pixel array index
 int xFromIdx(int i) {
   return (i % WIDTH);
 }
 
+// return a y-coordinate from pixel array index
 int yFromIdx(int i) {
   return (i / WIDTH);
 }
 
+// try to return a cell at given coordinates, otherwise returning NULL
 Cell * getCell(SimData * sim, int x, int y) {
   int idx = idxFromCoord(x, y);
   if (idx < 0) {

@@ -39,7 +39,9 @@ float * Render(long tick) {
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
         // currently no selection tool, defaults to DIRT brush
-        setCell(&sim, 0, mouseX + i, mouseY + j, DIRT, (rand() % 2) * 2 - 1);
+        if (getCell(&sim, mouseX + i, mouseY + j)) {
+          setCell(&sim, 0, mouseX + i, mouseY + j, DIRT, (rand() % 2) * 2 - 1);
+        }
       }
     }
   }
