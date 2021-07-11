@@ -2,9 +2,9 @@ CC=gcc
 
 CFLAGS=-lGL -lGLU -lglut -Wall -Werror -fsanitize=address -std=gnu11 -lrt -lm
 
-game: game.c renderer.c sand.c cells.c
-	$(CC) $(CFLAGS) $^ -o ./game
+game: src/game.c src/renderer.c src/sand.c src/cells.c
+	$(CC) $(CFLAGS) $^ -o ./build/game
 
-test: game.c renderer.c sand.c cells.c
-	$(CC) $(CFLAGS) $^ -o ./game
+test: src/game.c src/renderer.c src/sand.c src/cells.c
+	$(CC) $(CFLAGS) $^ -o ./build/game
 	./game
