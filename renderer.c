@@ -7,8 +7,8 @@
 #include "renderer.h"
 
 int
-  CurrentWidth = 800,
-  CurrentHeight = 800,
+  CurrentWidth = WINDOW_WIDTH,
+  CurrentHeight = WINDOW_WIDTH,
   WindowHandle = 0;
 
 float cellTranslations[NUM_CELLS][2];
@@ -128,6 +128,8 @@ void InitWindow(int argc, char* argv[]) {
     );
     exit(EXIT_FAILURE);
   }
+  // register mouse function
+  glutMouseFunc(mouseClicked);
 
   glutReshapeFunc(ResizeFunction);
   glutDisplayFunc(RenderFunction);

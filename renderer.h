@@ -3,10 +3,11 @@
 
 #define WINDOW_TITLE_PREFIX "Sand"
 #define RGBA_OFFSET 4
+#define WINDOW_WIDTH 800
 
 // SIM CONSTANTS
 
-#define WIDTH 600
+#define WIDTH 50
 #define NUM_CELLS (WIDTH * WIDTH)
 #define CELL_WIDTH (1.0f * WIDTH / NUM_CELLS)
 
@@ -41,5 +42,6 @@ float * Init(void);
 // Called every frame
 float * Render(long tick);
 void CleanupSim(void);
+void mouseClicked(int button, int state, int x, int y);
 
 #endif
