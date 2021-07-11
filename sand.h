@@ -3,6 +3,7 @@
 
 #define AIR 0
 #define DIRT 1
+#define WATER 2
 
 int idxFromCoord(int x, int y);
 int xFromIdx(int i);
@@ -23,6 +24,8 @@ typedef struct {
 typedef struct {
   int type;
   Position pos;
+  char dir;
+  long lastUpdate;
 } Cell;
 
 typedef struct {
@@ -32,8 +35,8 @@ typedef struct {
 
 
 Cell * getCell(SimData * sim, int x, int y);
-void setCell(SimData * sim, int x, int y, int type);
-void updateCell(SimData * sim, int x, int y);
+void setCell(SimData * sim, long tick, int x, int y, int type);
+void updateCell(SimData * sim, long tick, int x, int y);
 void setColor(float * colors, int idx, float r, float g, float b, float a);
 
 #endif
