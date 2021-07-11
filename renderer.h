@@ -7,7 +7,7 @@
 
 // SIM CONSTANTS
 
-#define WIDTH 50
+#define WIDTH 700
 #define NUM_CELLS (WIDTH * WIDTH)
 #define CELL_WIDTH (1.0f * WIDTH / NUM_CELLS)
 
@@ -43,5 +43,6 @@ float * Init(void);
 float * Render(long tick);
 void CleanupSim(void);
 void mouseClicked(int button, int state, int x, int y);
+void mouseMoved(int x, int y);
 
 #endif

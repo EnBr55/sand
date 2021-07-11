@@ -3,8 +3,13 @@
 #include <GL/freeglut.h>
 #include "renderer.h"
 #include "sand.h"
+#include <stdbool.h>
 
 SimData sim;
+bool mouseDown = 0;
+float cellPixelWidth = 1.0f * WINDOW_WIDTH / WIDTH;
+int mouseX = WINDOW_WIDTH / 2;
+int mouseY = WINDOW_WIDTH / 2;
 
 float * Init() {
   sim.cells = malloc(sizeof(Cell) * NUM_CELLS);
@@ -26,6 +31,14 @@ float * Init() {
 }
 
 float * Render(long tick) {
+  if (mouseDown) {
+    int size = 90;
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; i < size; i++) {
+        setCell(&sim, 0, mouseX + i, mouseY + j, DIRT, (rand() % 2) * 2 - 1);
+      }
+    }
+  }
   float * cellColors = sim.cellColors;
   for (int i = 0; i < NUM_CELLS; i++) {
     if (tick % 1 == 0) {
@@ -35,13 +48,16 @@ float * Render(long tick) {
   return cellColors;
 }
 
-void mouseClicked(int button, int state, int x, int y) {
-  int cellPixelWidth = WINDOW_WIDTH / WIDTH;
+void mouseMoved(int x, int y) {
   int normalizedX = x / cellPixelWidth;
   // normalize y such that (0, 0) is the bottom left of the screen
   int normalizedY = WIDTH - (y / cellPixelWidth) - 1;
-  printf("Button: %d, state: %d, x: %d, y: %d\n", button, state, normalizedX, normalizedY);
-  setCell(&sim, 0, normalizedX, normalizedY, WATER, (rand() % 2) * 2 - 1);
+  mouseX = normalizedX;
+  mouseY = normalizedY;
+}
+
+void mouseClicked(int button, int state, int x, int y) {
+  mouseDown = !state;
 }
 
 void CleanupSim() {

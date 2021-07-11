@@ -25,6 +25,7 @@ void updateWater(SimData * sim, long tick, int x, int y) {
     int idx = idxFromCoord(x, y);
     // get current direction of water cell
     int dir = sim->cells[idx].dir;
+    //printf("dir: %d\n", dir);
     // first try to move straight down
     char moveSideways = 0;
     int xDir = 0;

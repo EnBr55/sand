@@ -128,8 +128,10 @@ void InitWindow(int argc, char* argv[]) {
     );
     exit(EXIT_FAILURE);
   }
-  // register mouse function
+  // register mouse functions
   glutMouseFunc(mouseClicked);
+  glutMotionFunc(mouseMoved);
+  glutPassiveMotionFunc(mouseMoved);
 
   glutReshapeFunc(ResizeFunction);
   glutDisplayFunc(RenderFunction);

@@ -47,7 +47,13 @@ void setCell(SimData * sim, long tick, int x, int y, int type, char dir) {
 
 void flipDirection(SimData * sim, int x, int y) {
   int idx = idxFromCoord(x, y);
-  sim->cells[idx].dir *= -1;
+  //printf("direction BEFORE flip: %d\n", sim->cells[idx].dir);
+  if (sim->cells[idx].dir == 1) {
+    sim->cells[idx].dir = -1;
+  } else {
+    sim->cells[idx].dir = 1;
+  }
+  //printf("direction after flip: %d\n", sim->cells[idx].dir);
 }
 
 void setColor(float * colors, int idx, float r, float g, float b, float a) {
