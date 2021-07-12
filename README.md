@@ -10,7 +10,7 @@ The renderer is fully contained in `renderer.c` with some function signatures ou
 
 Just `git clone` this repository and then `cd` into the directory before running `make`. The program can be launched from `./build/game`.
 
-**Note**: based on your hardware, there are some variables you might want to change. In the `renderer.h` file, the constant `WIDTH` defines the number of horizontal cells in the simulation, so there will be `WIDTH^2` total cells rendered each frame. In `game.c`, the `BRUSH_SIZE` constant defines a square region of this size in which cells will be filled while around the cursor while the left mouse button is down.
+**Note**: based on your hardware, there are some variables you might want to change. In the `renderer.h` file, the constant `WIDTH` defines the number of horizontal cells in the simulation, so there will be `WIDTH^2` total cells rendered each frame. In `game.c`, the `BRUSH_SIZE` constant defines a square region of this size in which cells will be filled around the cursor while the left mouse button is down.
 
 ## Defining your own program using the rendering library
 
