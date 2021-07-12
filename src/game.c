@@ -5,6 +5,8 @@
 #include "sand.h"
 #include <stdbool.h>
 
+#define BRUSH_SIZE 10
+
 // globals
 SimData sim;
 bool mouseDown = 0;
@@ -34,12 +36,11 @@ float * Init() {
 // Render function is called by renderer.c every frame
 float * Render(long tick) {
   if (mouseDown) {
-    // square brush of size "size" 
-    int size = 30;
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        // currently no selection tool, defaults to DIRT brush
+    // basic square brush 
+    for (int i = 0; i < BRUSH_SIZE; i++) {
+      for (int j = 0; j < BRUSH_SIZE; j++) {
         if (getCell(&sim, mouseX + i, mouseY + j)) {
+          // currently no selection tool, defaults to DIRT brush
           setCell(&sim, 0, mouseX + i, mouseY + j, DIRT, (rand() % 2) * 2 - 1);
         }
       }

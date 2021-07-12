@@ -7,7 +7,7 @@
 
 // SIM CONSTANTS
 
-#define WIDTH 700
+#define WIDTH 400
 #define NUM_CELLS (WIDTH * WIDTH)
 #define CELL_WIDTH (1.0f * WIDTH / NUM_CELLS)
 
@@ -33,6 +33,8 @@ void CreateVBO(void);
 void DestroyVBO(void);
 void CreateShaders(void);
 void DestroyShaders(void);
+// called by client, implemented by renderer
+void RenderSprite(void * texture, int x, int y);
 
 // Should be implemented by client
 
