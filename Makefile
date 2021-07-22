@@ -1,6 +1,8 @@
 CC=gcc
 
 CFLAGS=-lGL -lGLU -lglut -Wall -Werror -fsanitize=address -std=gnu11 -lrt -lm
+TEMPFLAGS=-lGL -lGLU -lglut -Wall -Werror -std=gnu11 -lrt -lm
+
 
 game: src/game.c src/renderer.c src/sand.c src/cells.c
 	mkdir -p build
@@ -8,5 +10,5 @@ game: src/game.c src/renderer.c src/sand.c src/cells.c
 
 test: src/game.c src/renderer.c src/sand.c src/cells.c
 	mkdir -p build
-	$(CC) $(CFLAGS) $^ -o ./build/game
+	$(CC) $(TEMPFLAGS) $^ -o ./build/game
 	./build/game
