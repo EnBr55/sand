@@ -38,7 +38,12 @@ void updateWater(SimData * sim, long tick, int x, int y) {
     // if still can't go straight down, try sideways
     if (target == NULL || target->type != AIR) {
       moveSideways = 1;
-      target = getCell(sim, x + dir, y);
+      target = getCell(sim, x + 1, y);
+      dir = 1;
+    } else if (target == NULL || target->type != AIR) {
+      moveSideways = 1;
+      target = getCell(sim, x - 1, y);
+      dir = -1;
     }
     // update position
     if (target != NULL && target->type == AIR) {

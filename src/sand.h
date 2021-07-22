@@ -44,4 +44,7 @@ void setColor(float * colors, int idx, float r, float g, float b, float a);
 
 void flipDirection(SimData * sim, int x, int y);
 
+float gradient(int x1, int y1, int x2, int y2);
+float distance(int x1, int y1, int x2, int y2);
+
 #endif

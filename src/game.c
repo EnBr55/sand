@@ -4,6 +4,7 @@
 #include "renderer.h"
 #include "sand.h"
 #include <stdbool.h>
+#include <math.h>
 
 #define BRUSH_SIZE 10
 
@@ -14,6 +15,7 @@ float cellPixelWidth = 1.0f * WINDOW_WIDTH / WIDTH; // should probs be macro
 int mouseX = WINDOW_WIDTH / 2; // default cursor to this position
 int mouseY = WINDOW_WIDTH / 2;
 
+void drawLine(int x1, int y1, int x2, int y2);
 
 // Simulation initialisation function. Should return initial "canvas" state
 float * Init() {
@@ -41,12 +43,13 @@ float * Render(long tick) {
       for (int j = 0; j < BRUSH_SIZE; j++) {
         if (getCell(&sim, mouseX + i, mouseY + j)) {
           // currently no selection tool, defaults to DIRT brush
-          setCell(&sim, 0, mouseX + i, mouseY + j, DIRT, (rand() % 2) * 2 - 1);
+          setCell(&sim, 0, mouseX + i, mouseY + j, WATER, (rand() % 2) * 2 - 1);
         }
       }
     }
   }
   float * cellColors = sim.cellColors;
+  drawLine(10, 50, 90, 58);
   for (int i = 0; i < NUM_CELLS; i++) {
     // for now just update each cell unconditionally on every tick
     if (tick % 1 == 0) {
@@ -54,6 +57,26 @@ float * Render(long tick) {
     }
   }
   return cellColors;
+}
+
+void drawLine(int x1, int y1, int x2, int y2) {
+    float g = gradient(x1, y1, x2, y2);
+    int xdiff = abs(x2 - x1);
+    // get sign of direction of movement
+    int xdir = (x2 - x1) / xdiff;
+
+    // for each move in the x direction, compute y value using dy/dx
+    int x, y;
+    for (int i = 0; i < xdiff; i++) {
+        x = x1 + i*xdir;
+        y = y1 + floor(i * g);
+        //printf("g: %f, xdiff: %d, xdir: %d, x: %d, y: %d\n", g, xdiff, xdir, x, y);
+        // NOT CALLING ??
+        if (getCell(&sim, x, y)) {
+          // currently no selection tool, defaults to DIRT brush
+          setCell(&sim, 0, x, y, DIRT, (rand() % 2) * 2 - 1);
+        }
+    }
 }
 
 void mouseMoved(int x, int y) {

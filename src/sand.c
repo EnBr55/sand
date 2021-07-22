@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "renderer.h"
 #include "sand.h"
 #include "cells.h"
@@ -87,3 +88,12 @@ void updateCell(SimData * sim, long tick, int x, int y) {
       break;
   }
 }
+
+float gradient(int x1, int y1, int x2, int y2) { 
+    return ((float) (y2 - y1)) / ((float)(x2 - x1));
+}
+
+float distance(int x1, int y1, int x2, int y2) {
+    return sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2));
+}
+
