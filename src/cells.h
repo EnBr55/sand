@@ -2,7 +2,7 @@
 #define CELLS_H_INCLUDED
 #include "sand.h"
 
-#define GRAVITY -0.4f
+#define GRAVITY -1.0f
 
 void updateAir(SimData * sim, long tick, int x, int y);
 void updateDirt(SimData * sim, long tick, int x, int y);

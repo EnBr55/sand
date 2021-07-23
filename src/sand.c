@@ -41,13 +41,13 @@ void setCell(SimData * sim, long tick, int x, int y, float vx, float vy, int typ
   sim->cells[idx].vel.y = vy;
   sim->cells[idx].lastUpdate = tick;
   if (type == DIRT) {
-    setColor(sim->cellColors, idx, 0.3f, 0.1f, 0.1f, 1.0f);
+    setColor(sim->cellColors, idx, 0.59f, 0.40f, 0.23f, 1.0f);
   }
   if (type == AIR) {
-    setColor(sim->cellColors, idx, 0.2f, 0.2f, 0.9f, 1.0f);
+    setColor(sim->cellColors, idx, 0.1f, 0.1f, 0.1f, 1.0f);
   }
   if (type == WATER) {
-    setColor(sim->cellColors, idx, 0.0f, 0.2f, 0.7f, 1.0f);
+    setColor(sim->cellColors, idx, 0.2f, 0.2f, 0.7f, 1.0f);
   }
 }
 
@@ -63,7 +63,6 @@ void updateCell(SimData * sim, long tick, int x, int y) {
   if (sim->cells[idx].lastUpdate == tick) {
     return;
   }
-  sim->cells[idx].lastUpdate = tick;
 
   int type = sim->cells[idx].type;
   switch(type) {
@@ -77,6 +76,7 @@ void updateCell(SimData * sim, long tick, int x, int y) {
       updateWater(sim, tick, x, y);
       break;
   }
+  //sim->cells[idx].lastUpdate = tick;
 }
 
 float gradient(int x1, int y1, int x2, int y2) { 

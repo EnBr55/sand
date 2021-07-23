@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define BRUSH_SIZE 20
+#define BRUSH_SIZE 60
 
 // globals
 SimData sim;

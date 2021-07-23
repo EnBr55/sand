@@ -15,6 +15,19 @@ void velocityUpdate(SimData * sim, int x, int y, long tick) {
     int x2 = x + round(this->vel.x);
     int y2 = y + round(this->vel.y);
 
+    int xdiff = abs(x2 - x);
+    int ydiff = abs(y2 - y);
+    // 0 if there's no xdiff, 1 otherwise
+    int xSign = 0;
+    int ySign = 0;
+
+    if (xdiff != 0) {
+      xSign = (x2 - x) / xdiff;
+    }
+    if (ydiff != 0) {
+      ySign = (y2 - y) / ydiff;
+    }
+
     // we draw a line function. If our line is purely in 1d, then 
     // it's no longer a function and we need a different method to update
     if (x2 == x || y2 == y) {
@@ -23,9 +36,6 @@ void velocityUpdate(SimData * sim, int x, int y, long tick) {
     }
 
     float g = gradient(x, y, x2, y2);
-    int xdiff = abs(x2 - x);
-    // get sign of direction of movement
-    int xdir = (x2 - x) / xdiff;
 
     // for each move in the x direction, compute y value using dy/dx
     int pathX, pathY;
@@ -40,8 +50,8 @@ void velocityUpdate(SimData * sim, int x, int y, long tick) {
 
     Cell * target;
     for (int i = 1; i <= xdiff; i++) {
-        pathX = x + i*xdir;
-        pathY = y + floor(i * g);
+        pathX = x + i*xSign;
+        pathY = y + floor(i * abs(g))*ySign;
         target = getCell(sim, pathX, pathY);
         if (target != NULL && target->type == AIR) {
           // currently no selection tool, defaults to DIRT brush
@@ -60,8 +70,14 @@ void lineUpdate(SimData * sim, int x, int y, int x2, int y2, long tick) {
     int xdiff = abs(x2 - x);
     int ydiff = abs(y2 - y);
     // 0 if there's no xdiff, 1 otherwise
-    int xFlag = MIN(xdiff, 1);
-    int yFlag = MIN(ydiff, 1);
+    int xSign = 0;
+    int ySign = 0;
+    if (xdiff != 0) {
+      xSign = (x2 - x) / xdiff;
+    }
+    if (ydiff != 0) {
+      ySign = (y2 - y) / ydiff;
+    }
 
     int pathX, pathY;
     int oldX = x;
@@ -76,8 +92,8 @@ void lineUpdate(SimData * sim, int x, int y, int x2, int y2, long tick) {
     
     // either xdiff or ydiff is assumed to be 0
     for (int i = 1; i <= MAX(xdiff, ydiff); i++) {
-      pathX = x + i*xFlag;
-      pathY = y - i*yFlag;
+      pathX = x + i*xSign;
+      pathY = y + i*ySign;
       target = getCell(sim, pathX, pathY);
       if (target != NULL && target->type == AIR) {
         // currently no selection tool, defaults to DIRT brush
@@ -88,6 +104,8 @@ void lineUpdate(SimData * sim, int x, int y, int x2, int y2, long tick) {
         oldX = pathX;
         oldY = pathY;
       } else {
+        // invert x velocity
+        setCell(sim, tick, oldX, oldY, oldCell.vel.x * -1.0f, oldCell.vel.y, oldCell.type);
         break;
       }
     }
@@ -103,7 +121,7 @@ void updateDirt(SimData * sim, long tick, int x, int y) {
     if (below != NULL && below->type == AIR) {
       // if it's just air, increase downwards velocity
       this->vel.y += GRAVITY;
-    } else if (below != NULL && below-> type != AIR) {
+    } else if (below != NULL && below->type != AIR) {
       // if there's something below, stop moving down
       this->vel.y = 0;
       // if we can't go straight down try move (x - 1, x, x + 1) at random
@@ -119,31 +137,35 @@ void updateDirt(SimData * sim, long tick, int x, int y) {
 }
 
 void updateWater(SimData * sim, long tick, int x, int y) {
-    // first try to move straight down
-    char moveSideways = 0;
-    int xDir = 0;
-    Cell * target = getCell(sim, x, y - 1);
-    if (target == NULL || target->type != AIR) {
-      // if we can't go straight down try move (x - 1, x + 1) at random
-      xDir = (rand() % 2) * 2 - 1;
-      target = getCell(sim, x + xDir, y - 1);
+    Cell * this = getCell(sim, x, y);
+    Cell * below = getCell(sim, x, y - 1);
+    // first check what's below us.
+    if (below != NULL && below->type == AIR) {
+      // if it's just air, increase downwards velocity
+      this->vel.y += GRAVITY;
+      // if it has been 2 ticks since this was updated, lose all x velocity
+      if (this->lastUpdate < (tick - 2)) {
+        this->vel.x = 0;
+        //printf("aa\n");
+      }
+    } else if (below != NULL && below->type != AIR) {
+      this->vel.y = 0;
+      // if it's something other than air, try move down and left/right
+      int xDir = (rand() % 2) * 2 - 1;
+      Cell * target = getCell(sim, x + xDir, y - 1);
+      if (target != NULL && target->type == AIR) {
+        setCell(sim, tick,
+            x + xDir,
+            y - 1,
+            this->vel.x + xDir,
+            this->vel.y,
+            WATER);
+        setCell(sim, tick, x, y, 0, 0, AIR);
+      } else {
+        if (this->vel.x < 0.9) {
+          this->vel.x = xDir;
+        }
+      }
     }
-    // if still can't go straight down, try sideways
-    if (target == NULL || target->type != AIR) {
-      moveSideways = 1;
-      target = getCell(sim, x + xDir, y);
-    }
-    // update position
-    if (target != NULL && target->type == AIR) {
-      Cell * this = getCell(sim, x, y);
-      setCell(sim, tick,
-          x + xDir,
-          y + (moveSideways ? 0 : -1),
-          this->vel.x,
-          this->vel.y,
-          WATER);
-      setCell(sim, tick, x, y, 0, 0, AIR);
-    } else {
-      // if everything else fails, flip direction of movement for next tick ?
-    }
+    velocityUpdate(sim, x, y, tick);
 }
