@@ -3,11 +3,11 @@
 
 #define WINDOW_TITLE_PREFIX "Sand"
 #define RGBA_OFFSET 4
-#define WINDOW_WIDTH 800
+#define WINDOW_WIDTH 1000
 
 // SIM CONSTANTS
 
-#define WIDTH 150
+#define WIDTH 1000
 #define NUM_CELLS (WIDTH * WIDTH)
 #define CELL_WIDTH (1.0f * WIDTH / NUM_CELLS)
 

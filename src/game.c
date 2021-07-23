@@ -6,11 +6,12 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define BRUSH_SIZE 10
+#define BRUSH_SIZE 20
 
 // globals
 SimData sim;
 bool mouseDown = 0;
+int mouseButton;
 float cellPixelWidth = 1.0f * WINDOW_WIDTH / WIDTH; // should probs be macro
 int mouseX = WINDOW_WIDTH / 2; // default cursor to this position
 int mouseY = WINDOW_WIDTH / 2;
@@ -43,13 +44,14 @@ float * Render(long tick) {
       for (int j = 0; j < BRUSH_SIZE; j++) {
         if (getCell(&sim, mouseX + i, mouseY + j)) {
           // currently no selection tool, defaults to DIRT brush
-          setCell(&sim, 0, mouseX + i, mouseY + j, 0, 0, WATER);
+          setCell(&sim, 0, mouseX + i, mouseY + j, 0, 0, 
+              mouseButton == 0 ? DIRT : WATER);
         }
       }
     }
   }
   float * cellColors = sim.cellColors;
-  //drawLine(10, 50, 90, 58);
+  //drawLine(400, 400, 425, 410);
   for (int i = 0; i < NUM_CELLS; i++) {
     // for now just update each cell unconditionally on every tick
     if (tick % 1 == 0) {
@@ -90,6 +92,7 @@ void mouseMoved(int x, int y) {
 // this is called both on the start and end of a mouse button being clicked
 void mouseClicked(int button, int state, int x, int y) {
   mouseDown = !state;
+  mouseButton = button;
 }
 
 void CleanupSim() {
