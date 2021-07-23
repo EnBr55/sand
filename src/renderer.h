@@ -7,7 +7,7 @@
 
 // SIM CONSTANTS
 
-#define WIDTH 100
+#define WIDTH 150
 #define NUM_CELLS (WIDTH * WIDTH)
 #define CELL_WIDTH (1.0f * WIDTH / NUM_CELLS)
 

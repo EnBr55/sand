@@ -32,13 +32,14 @@ Cell * getCell(SimData * sim, int x, int y) {
   return sim->cells + idx;
 }
 
-void setCell(SimData * sim, long tick, int x, int y, int type, char dir) {
+void setCell(SimData * sim, long tick, int x, int y, float vx, float vy, int type) {
   int idx = idxFromCoord(x, y);
   sim->cells[idx].type = type;
   sim->cells[idx].pos.x = x;
   sim->cells[idx].pos.y = y;
+  sim->cells[idx].vel.x = vx;
+  sim->cells[idx].vel.y = vy;
   sim->cells[idx].lastUpdate = tick;
-  sim->cells[idx].dir = dir;
   if (type == DIRT) {
     setColor(sim->cellColors, idx, 0.3f, 0.1f, 0.1f, 1.0f);
   }
@@ -48,17 +49,6 @@ void setCell(SimData * sim, long tick, int x, int y, int type, char dir) {
   if (type == WATER) {
     setColor(sim->cellColors, idx, 0.0f, 0.2f, 0.7f, 1.0f);
   }
-}
-
-void flipDirection(SimData * sim, int x, int y) {
-  int idx = idxFromCoord(x, y);
-  //printf("direction BEFORE flip: %d\n", sim->cells[idx].dir);
-  if (sim->cells[idx].dir == 1) {
-    sim->cells[idx].dir = -1;
-  } else {
-    sim->cells[idx].dir = 1;
-  }
-  //printf("direction after flip: %d\n", sim->cells[idx].dir);
 }
 
 void setColor(float * colors, int idx, float r, float g, float b, float a) {

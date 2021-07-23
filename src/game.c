@@ -27,9 +27,9 @@ float * Init() {
   for (int i = 0; i < NUM_CELLS; i++) {
     // arbitrarily make the first 1/3 of cells be dirt
     if (i < NUM_CELLS / 3) {
-      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), DIRT, 0);
+      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), 0, 0, DIRT);
     } else {
-      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), AIR, 0);
+      setCell(&sim, 0, xFromIdx(i), yFromIdx(i), 0, 0, AIR);
     }
   }
   return cellColors;
@@ -43,13 +43,13 @@ float * Render(long tick) {
       for (int j = 0; j < BRUSH_SIZE; j++) {
         if (getCell(&sim, mouseX + i, mouseY + j)) {
           // currently no selection tool, defaults to DIRT brush
-          setCell(&sim, 0, mouseX + i, mouseY + j, WATER, (rand() % 2) * 2 - 1);
+          setCell(&sim, 0, mouseX + i, mouseY + j, 0, 0, WATER);
         }
       }
     }
   }
   float * cellColors = sim.cellColors;
-  drawLine(10, 50, 90, 58);
+  //drawLine(10, 50, 90, 58);
   for (int i = 0; i < NUM_CELLS; i++) {
     // for now just update each cell unconditionally on every tick
     if (tick % 1 == 0) {
@@ -74,7 +74,7 @@ void drawLine(int x1, int y1, int x2, int y2) {
         // NOT CALLING ??
         if (getCell(&sim, x, y)) {
           // currently no selection tool, defaults to DIRT brush
-          setCell(&sim, 0, x, y, DIRT, (rand() % 2) * 2 - 1);
+          setCell(&sim, 0, x, y, 0, 0, DIRT);
         }
     }
 }

@@ -16,16 +16,13 @@ void updateDirt(SimData * sim, long tick, int x, int y) {
       target = getCell(sim, x + xDir, y - 1);
     }
     if (target != NULL && target->type == AIR) {
-      setCell(sim, tick, x + xDir, y - 1, DIRT, 0);
-      setCell(sim, tick, x, y, AIR, 0);
+      Cell * this = getCell(sim, x, y);
+      setCell(sim, tick, x + xDir, y - 1, this->vel.x, this->vel.y, DIRT);
+      setCell(sim, tick, x, y, 0, 0, AIR);
     }
 }
 
 void updateWater(SimData * sim, long tick, int x, int y) {
-    int idx = idxFromCoord(x, y);
-    // get current direction of water cell
-    int dir = sim->cells[idx].dir;
-    //printf("dir: %d\n", dir);
     // first try to move straight down
     char moveSideways = 0;
     int xDir = 0;
@@ -38,23 +35,19 @@ void updateWater(SimData * sim, long tick, int x, int y) {
     // if still can't go straight down, try sideways
     if (target == NULL || target->type != AIR) {
       moveSideways = 1;
-      target = getCell(sim, x + 1, y);
-      dir = 1;
-    } else if (target == NULL || target->type != AIR) {
-      moveSideways = 1;
-      target = getCell(sim, x - 1, y);
-      dir = -1;
+      target = getCell(sim, x + xDir, y);
     }
     // update position
     if (target != NULL && target->type == AIR) {
+      Cell * this = getCell(sim, x, y);
       setCell(sim, tick,
-          x + (moveSideways ? dir : xDir),
+          x + xDir,
           y + (moveSideways ? 0 : -1),
-          WATER,
-          dir);
-      setCell(sim, tick, x, y, AIR, 0);
+          this->vel.x,
+          this->vel.y,
+          WATER);
+      setCell(sim, tick, x, y, 0, 0, AIR);
     } else {
-      // if everything else fails, flip direction of movement for next tick
-      flipDirection(sim, x, y);
+      // if everything else fails, flip direction of movement for next tick ?
     }
 }

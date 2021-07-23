@@ -24,9 +24,14 @@ typedef struct {
 } Position;
 
 typedef struct {
+  float x;
+  float y;
+} Velocity;
+
+typedef struct {
   int type;
   Position pos;
-  char dir;
+  Velocity vel;
   long lastUpdate;
 } Cell;
 
@@ -38,11 +43,9 @@ typedef struct {
 
 // simulation functions
 Cell * getCell(SimData * sim, int x, int y);
-void setCell(SimData * sim, long tick, int x, int y, int type, char dir);
+void setCell(SimData * sim, long tick, int x, int y, float vx, float vy, int type);
 void updateCell(SimData * sim, long tick, int x, int y);
 void setColor(float * colors, int idx, float r, float g, float b, float a);
-
-void flipDirection(SimData * sim, int x, int y);
 
 float gradient(int x1, int y1, int x2, int y2);
 float distance(int x1, int y1, int x2, int y2);
